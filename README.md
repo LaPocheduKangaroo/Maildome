@@ -139,7 +139,7 @@ The installer walks through 5 questions, recommends a tier, and deploys the stac
 |-------|-------------|--------|
 | 1 | Project skeleton, Docker Compose | ✓ |
 | 2 | Config system, DB/Redis connections | ✓ |
-| 3 | L0 Acquisition (IMAP/Milter/Journal) | ⬜ |
+| 3 | L0 Acquisition (IMAP/Milter/Journal) | ✓ IMAP |
 | 4 | L1 Static Analysis | ⬜ |
 | 5 | L5 Decision Engine | ⬜ |
 | 6 | API complete | ⬜ |
