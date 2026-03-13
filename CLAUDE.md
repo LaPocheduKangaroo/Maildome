@@ -174,10 +174,10 @@ Dead letter produces banner "integrity unknown", email delivered.
 | 1 | Project skeleton, Docker Compose | ✓ done |
 | 2 | Config system, DB/Redis connections | ✓ done |
 | 3 | L0 Acquisition — IMAP module | ✓ done |
-| 4 | L1 Static Analysis | ⬜ next |
-| 5 | L5 Decision Engine | ⬜ |
-| 6 | API complete + auth | ⬜ |
-| 7 | Thunderbird plugin | ⬜ |
+| 4 | L1 Static Analysis | ✓ done |
+| 5 | L5 Decision Engine | ✓ done |
+| 6 | API complete + auth | ✓ done |
+| 7 | Thunderbird plugin | ⬜ next |
 | 8 | install.sh | ⬜ |
 
 ---
