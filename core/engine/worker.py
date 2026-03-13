@@ -20,6 +20,7 @@ import structlog
 from celery import Celery
 
 from core.analysis.l1_static import run_all_checks
+from core.engine.decision import decide
 
 log = structlog.get_logger()
 
@@ -71,7 +72,7 @@ async def _run_analysis(email_id: int) -> dict:
 
         results = await run_all_checks(msg, pool, redis)
 
-        partial_score = min(100, sum(r.score for r in results))
+        decision = decide(results)
 
         async with pool.acquire() as conn:
             async with conn.transaction():
@@ -88,18 +89,28 @@ async def _run_analysis(email_id: int) -> dict:
                         r.detail,
                     )
                 await conn.execute(
-                    "UPDATE emails SET score = $1 WHERE id = $2",
-                    partial_score,
+                    """
+                    UPDATE emails
+                    SET score = $1, verdict = $2, scanned_at = NOW()
+                    WHERE id = $3
+                    """,
+                    decision.score,
+                    decision.verdict,
                     email_id,
                 )
 
         log.info(
-            "l1_complete",
+            "scan_complete",
             email_id=email_id,
-            partial_score=partial_score,
-            checks={r.name: r.score for r in results},
+            score=decision.score,
+            verdict=decision.verdict,
         )
-        return {"email_id": email_id, "status": "l1_complete", "score": partial_score}
+        return {
+            "email_id": email_id,
+            "status": "scan_complete",
+            "score": decision.score,
+            "verdict": decision.verdict,
+        }
 
     finally:
         await pool.close()
