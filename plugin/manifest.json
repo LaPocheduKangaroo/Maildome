@@ -1,0 +1,42 @@
+{
+  "manifest_version": 2,
+  "name": "MailDome",
+  "version": "1.0.0",
+  "description": "Displays a security verdict banner for each email, powered by your MailDome server.",
+
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "maildome@maildome.security",
+      "strict_min_version": "102.0"
+    }
+  },
+
+  "permissions": [
+    "messagesRead",
+    "storage",
+    "<all_urls>"
+  ],
+
+  "background": {
+    "scripts": ["utils.js", "background.js"]
+  },
+
+  "message_display_scripts": [
+    {
+      "js": ["utils.js", "content/banner.js"],
+      "css": ["content/banner.css"]
+    }
+  ],
+
+  "browser_action": {
+    "default_title": "MailDome Settings",
+    "default_icon": {
+      "48": "icons/icon.svg"
+    },
+    "default_popup": "popup/popup.html"
+  },
+
+  "icons": {
+    "48": "icons/icon.svg"
+  }
+}

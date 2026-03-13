@@ -1,0 +1,61 @@
+/*
+ * banner.css — MailDome verdict banner styles
+ *
+ * Injected alongside banner.js into every message display context.
+ * Uses only colours and sizing — no absolute/fixed positioning so it
+ * sits naturally above the email body without disrupting scroll.
+ */
+
+#maildome-banner {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 8px 14px;
+  margin: 0 0 6px 0;
+  font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  border-left: 4px solid transparent;
+  border-radius: 0 3px 3px 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* ── State colours ─────────────────────────────────────────── */
+
+#maildome-banner.md-clean {
+  background-color: #ecfdf5;
+  border-left-color: #16a34a;
+  color: #14532d;
+}
+
+#maildome-banner.md-suspicious {
+  background-color: #fff7ed;
+  border-left-color: #ea580c;
+  color: #7c2d12;
+}
+
+#maildome-banner.md-dangerous {
+  background-color: #fef2f2;
+  border-left-color: #dc2626;
+  color: #7f1d1d;
+  font-weight: 700;
+}
+
+#maildome-banner.md-pending {
+  background-color: #f0f9ff;
+  border-left-color: #0284c7;
+  color: #0c4a6e;
+}
+
+#maildome-banner.md-unknown {
+  background-color: #f9fafb;
+  border-left-color: #9ca3af;
+  color: #374151;
+}
+
+#maildome-banner.md-error {
+  background-color: #fef2f2;
+  border-left-color: #6b7280;
+  color: #374151;
+}

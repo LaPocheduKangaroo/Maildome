@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>MailDome Settings</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      width: 320px;
+      font-family: -apple-system, system-ui, sans-serif;
+      font-size: 13px;
+      color: #1f2937;
+      padding: 16px;
+    }
+    h1 {
+      font-size: 15px;
+      font-weight: 700;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 4px;
+      margin-top: 12px;
+    }
+    input[type="text"], input[type="password"] {
+      width: 100%;
+      padding: 6px 8px;
+      border: 1px solid #d1d5db;
+      border-radius: 4px;
+      font-size: 13px;
+    }
+    input[type="text"]:focus, input[type="password"]:focus {
+      outline: none;
+      border-color: #2563eb;
+    }
+    .hint {
+      font-size: 11px;
+      color: #6b7280;
+      margin-top: 3px;
+    }
+    .actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 16px;
+    }
+    button {
+      padding: 7px 12px;
+      border: none;
+      border-radius: 4px;
+      font-size: 13px;
+      cursor: pointer;
+      font-weight: 500;
+    }
+    #btn-save {
+      background: #2563eb;
+      color: #fff;
+      flex: 1;
+    }
+    #btn-save:hover { background: #1d4ed8; }
+    #btn-test {
+      background: #f3f4f6;
+      color: #374151;
+    }
+    #btn-test:hover { background: #e5e7eb; }
+    #status {
+      margin-top: 10px;
+      padding: 7px 10px;
+      border-radius: 4px;
+      font-size: 12px;
+      display: none;
+    }
+    #status.ok  { background: #ecfdf5; color: #14532d; display: block; }
+    #status.err { background: #fef2f2; color: #7f1d1d; display: block; }
+    #status.info { background: #f0f9ff; color: #0c4a6e; display: block; }
+  </style>
+</head>
+<body>
+  <h1>🛡 MailDome</h1>
+
+  <label for="api-url">Server URL</label>
+  <input type="text" id="api-url" placeholder="https://maildome.example.com" />
+  <p class="hint">Base URL of your MailDome instance (no trailing slash).</p>
+
+  <label for="api-token">API Token</label>
+  <input type="password" id="api-token" placeholder="••••••••" />
+  <p class="hint">Set via <code>API_TOKEN</code> in your MailDome server environment.</p>
+
+  <div class="actions">
+    <button id="btn-save">Save</button>
+    <button id="btn-test">Test connection</button>
+  </div>
+
+  <div id="status"></div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
