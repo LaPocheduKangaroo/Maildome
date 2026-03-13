@@ -2,18 +2,26 @@
 worker.py — Celery application for MailDome.
 
 The acquisition module enqueues tasks here.
-Analysis layers (L1–L5) will be implemented in subsequent blocks.
+The scan_email task runs the L1 Static Analysis pipeline.
 
 Startup:
     celery -A core.engine.worker worker --loglevel=info
 """
 
-import logging
+import asyncio
+import email
+import email.policy
 import os
+from pathlib import Path
 
+import asyncpg
+import redis.asyncio as aioredis
+import structlog
 from celery import Celery
 
-log = logging.getLogger(__name__)
+from core.analysis.l1_static import run_all_checks
+
+log = structlog.get_logger()
 
 _redis_password = os.environ.get("REDIS_PASSWORD", "")
 _redis_host = os.environ.get("REDIS_HOST", "redis")
@@ -27,22 +35,82 @@ celery_app.conf.update(
     accept_content=["json"],
     timezone="UTC",
     enable_utc=True,
-    # Prevent tasks from being lost if the broker restarts
     task_acks_late=True,
     worker_prefetch_multiplier=1,
 )
 
 
+def _build_db_url() -> str:
+    return (
+        f"postgresql://{os.environ.get('POSTGRES_USER', 'maildome')}"
+        f":{os.environ.get('POSTGRES_PASSWORD', '')}"
+        f"@{os.environ.get('POSTGRES_HOST', 'postgres')}:5432"
+        f"/{os.environ.get('POSTGRES_DB', 'maildome')}"
+    )
+
+
+def _build_redis_url() -> str:
+    return f"redis://:{os.environ.get('REDIS_PASSWORD', '')}@{os.environ.get('REDIS_HOST', 'redis')}:6379/0"
+
+
+async def _run_analysis(email_id: int) -> dict:
+    """Async core of the scan_email task: load email, run L1 checks, persist results."""
+    pool = await asyncpg.create_pool(dsn=_build_db_url(), min_size=1, max_size=1)
+    redis = aioredis.from_url(_build_redis_url(), decode_responses=False)
+
+    try:
+        row = await pool.fetchrow(
+            "SELECT storage_path FROM emails WHERE id = $1", email_id
+        )
+        if row is None:
+            raise ValueError(f"email_id {email_id} not found in DB")
+
+        eml_path = Path(row["storage_path"])
+        raw = eml_path.read_bytes()
+        msg = email.message_from_bytes(raw, policy=email.policy.default)
+
+        results = await run_all_checks(msg, pool, redis)
+
+        partial_score = min(100, sum(r.score for r in results))
+
+        async with pool.acquire() as conn:
+            async with conn.transaction():
+                for r in results:
+                    await conn.execute(
+                        """
+                        INSERT INTO check_results (email_id, check_name, passed, score, detail)
+                        VALUES ($1, $2, $3, $4, $5)
+                        """,
+                        email_id,
+                        r.name,
+                        r.passed,
+                        r.score,
+                        r.detail,
+                    )
+                await conn.execute(
+                    "UPDATE emails SET score = $1 WHERE id = $2",
+                    partial_score,
+                    email_id,
+                )
+
+        log.info(
+            "l1_complete",
+            email_id=email_id,
+            partial_score=partial_score,
+            checks={r.name: r.score for r in results},
+        )
+        return {"email_id": email_id, "status": "l1_complete", "score": partial_score}
+
+    finally:
+        await pool.close()
+        await redis.aclose()
+
+
 @celery_app.task(name="scan_email", bind=True, max_retries=3)
 def scan_email(self, email_id: int) -> dict:
-    """
-    L1+ analysis pipeline entry point.
-
-    Block 3 (L0) enqueues this task after saving the .eml and DB record.
-    Block 4 (Static Analysis) will implement the actual checks.
-    """
-    log.info(
-        "scan_email received email_id=%d — analysis pipeline not yet implemented",
-        email_id,
-    )
-    return {"email_id": email_id, "status": "queued"}
+    """L1 analysis pipeline entry point. Enqueued by the L0 acquisition module."""
+    try:
+        return asyncio.run(_run_analysis(email_id))
+    except Exception as exc:
+        log.error("scan_email_failed", email_id=email_id, error=str(exc))
+        raise self.retry(exc=exc, countdown=5 * (2 ** self.request.retries))

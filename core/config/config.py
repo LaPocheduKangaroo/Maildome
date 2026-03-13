@@ -10,6 +10,7 @@ import os
 import sys
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Optional
 
 
 CONFIG_PATH = os.environ.get(
@@ -65,15 +66,25 @@ class LoggingConfig:
 
 
 @dataclass
+class BlacklistsConfig:
+    spamhaus: bool
+    abusech: bool
+    openphish: bool
+    phishtank: bool
+    custom_ip_list: Optional[str]   # path or URL to custom IP blacklist
+    custom_url_list: Optional[str]  # path or URL to custom URL blacklist
+
+
+@dataclass
 class Settings:
     acquisition: AcquisitionConfig
     scoring: ScoringConfig
     notifications: NotificationsConfig
     api: ApiConfig
     logging: LoggingConfig
-    groups: dict          # group_name → profile
+    groups: dict             # group_name → profile
     default_profile: str
-    blacklists: dict      # list_name → enabled (bool)
+    blacklists: BlacklistsConfig
 
 
 def load(path: str = CONFIG_PATH) -> Settings:
@@ -145,14 +156,14 @@ def load(path: str = CONFIG_PATH) -> Settings:
                     groups[key] = value
 
         # Blacklists section
-        blacklists = {}
-        if c.has_section("blacklists"):
-            for key, value in c.items("blacklists"):
-                if not key.startswith("custom_"):
-                    try:
-                        blacklists[key] = c.getboolean("blacklists", key)
-                    except ValueError:
-                        pass  # skip custom list URLs
+        blacklists = BlacklistsConfig(
+            spamhaus=c.getboolean("blacklists", "spamhaus", fallback=True),
+            abusech=c.getboolean("blacklists", "abusech", fallback=True),
+            openphish=c.getboolean("blacklists", "openphish", fallback=True),
+            phishtank=c.getboolean("blacklists", "phishtank", fallback=True),
+            custom_ip_list=c.get("blacklists", "custom_ip_list", fallback=None),
+            custom_url_list=c.get("blacklists", "custom_url_list", fallback=None),
+        )
 
     except (configparser.NoSectionError, configparser.NoOptionError) as e:
         print(f"error: missing required config value: {e}", file=sys.stderr)

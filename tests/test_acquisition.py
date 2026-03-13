@@ -38,6 +38,7 @@ def _make_settings(tmp_path: Path):
     from core.config.config import (
         AcquisitionConfig,
         ApiConfig,
+        BlacklistsConfig,
         LoggingConfig,
         NotificationsConfig,
         ScoringConfig,
@@ -76,7 +77,14 @@ def _make_settings(tmp_path: Path):
         logging=LoggingConfig(level="debug", path=tmp_path / "mailshield.log"),
         groups={},
         default_profile="standard",
-        blacklists={},
+        blacklists=BlacklistsConfig(
+            spamhaus=True,
+            abusech=True,
+            openphish=True,
+            phishtank=True,
+            custom_ip_list=None,
+            custom_url_list=None,
+        ),
     )
 
 
