@@ -139,12 +139,16 @@ The installer walks through 5 questions, recommends a tier, and deploys the stac
 |-------|-------------|--------|
 | 1 | Project skeleton, Docker Compose | ✓ |
 | 2 | Config system, DB/Redis connections | ✓ |
-| 3 | L0 Acquisition (IMAP/Milter/Journal) | ✓ IMAP |
-| 4 | L1 Static Analysis | ⬜ |
-| 5 | L5 Decision Engine | ⬜ |
-| 6 | API complete | ⬜ |
-| 7 | Thunderbird plugin | ⬜ |
-| 8 | install.sh | ⬜ |
+| 3 | L0 Acquisition — IMAP IDLE + polling | ✓ |
+| 4 | L1 Static Analysis — SPF/DKIM/DMARC, IP reputation, typosquatting, URL blacklist, header anomalies | ✓ |
+| 5 | L5 Decision Engine — weighted score, configurable thresholds, CLEAN/SUSPICIOUS/DANGEROUS | ✓ |
+| 6 | REST API — email list/detail, verdict override, audit log, bearer token auth | ✓ |
+| 7 | Thunderbird plugin — verdict banner, settings popup | ✓ |
+| 8 | install.sh — interactive installer, tier recommendation, secrets generation | ✓ |
+| 9 | L2 Sender Behaviour (Advanced tier) | ⬜ |
+| 10 | L3 Attachment Triage — ClamAV in gVisor (Advanced tier) | ⬜ |
+| 11 | L4 VM Sandbox — CAPE (Premium tier) | ⬜ |
+| 12 | Keycloak RBAC + multi-tenant API | ⬜ |
 
 ---
 
