@@ -178,7 +178,7 @@ Dead letter produces banner "integrity unknown", email delivered.
 | 5 | L5 Decision Engine | ✓ done |
 | 6 | API complete + auth | ✓ done |
 | 7 | Thunderbird plugin | ✓ done |
-| 8 | install.sh | ⬜ next |
+| 8 | install.sh | ✓ done |
 
 ---
 
